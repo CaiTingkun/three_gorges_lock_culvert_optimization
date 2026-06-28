@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>三峡船闸输水廊道断面尺寸多目标优化分析网页模拟器</title>
+<style>
+  :root{
+    --bg:#f4f7fb;
+    --card:#ffffff;
+    --text:#111827;
+    --muted:#667085;
+    --line:#d9e1ec;
+    --blue:#2563eb;
+    --green:#0f766e;
+    --orange:#b45309;
+    --purple:#7c3aed;
+    --red:#dc2626;
+    --amber:#d97706;
+    --ok:#15803d;
+    --shadow:0 16px 40px rgba(15,23,42,.08);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 340px),
+      linear-gradient(180deg,#eef5ff 0%,var(--bg) 330px);
+  }
+  header{
+    max-width:1520px;
+    margin:0 auto;
+    padding:30px 32px 18px;
+  }
+  h1{
+    margin:0;
+    font-size:30px;
+    line-height:1.25;
+    letter-spacing:.1px;
+  }
+  .subtitle{
+    margin:12px 0 0;
+    max-width:1180px;
+    color:var(--muted);
+    line-height:1.75;
+    font-size:15px;
+  }
+  main{
+    max-width:1520px;
+    margin:0 auto;
+    padding:0 32px 38px;
+    display:grid;
+    grid-template-columns:430px minmax(0,1fr);
+    gap:20px;
+  }
+  .panel{
+    background:var(--card);
+    border:1px solid rgba(217,225,236,.95);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .inputs{
+    padding:18px;
+    align-self:start;
+    position:sticky;
+    top:14px;
+    max-height:calc(100vh - 28px);
+    overflow:auto;
+  }
+  .section{
+    border-top:1px solid var(--line);
+    padding-top:16px;
+    margin-top:16px;
+  }
+  .section:first-child{border-top:0;padding-top:0;margin-top:0}
+  h2{font-size:18px;margin:0 0 12px}
+  h3{font-size:15px;margin:0 0 12px;color:#1f2937}
+  .hint{
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.58;
+    margin:8px 0 0;
+  }
+  label{
+    display:grid;
+    grid-template-columns:1fr 122px;
+    align-items:center;
+    gap:10px;
+    margin:11px 0;
+    font-size:13.5px;
+  }
+  label span{line-height:1.35;color:#263244}
+  input[type=number]{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 9px;
+    font-size:14px;
+    outline:none;
+    background:#fff;
+  }
+  input[type=number]:focus{
+    border-color:#93c5fd;
+    box-shadow:0 0 0 3px rgba(37,99,235,.12);
+  }
+  .btns{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+  button{
+    border:0;
+    border-radius:12px;
+    padding:10px 12px;
+    font-weight:750;
+    cursor:pointer;
+    color:#111827;
+    background:#e5e7eb;
+  }
+  button.primary{background:var(--blue);color:#fff}
+  button.secondary{background:#e0f2fe;color:#075985}
+  button:hover{filter:brightness(.985)}
+  .dashboard{
+    display:grid;
+    gap:18px;
+    min-width:0;
+  }
+  .model-banner{
+    padding:16px 18px;
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:16px;
+    align-items:center;
+  }
+  .model-banner strong{font-size:16px}
+  .model-banner p{
+    margin:7px 0 0;
+    color:var(--muted);
+    line-height:1.65;
+    font-size:13px;
+  }
+  .tag{
+    display:inline-flex;
+    align-items:center;
+    border-radius:999px;
+    padding:8px 11px;
+    background:#eef2ff;
+    color:#3730a3;
+    border:1px solid #c7d2fe;
+    font-weight:800;
+    white-space:nowrap;
+    font-size:13px;
+  }
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:14px;
+  }
+  .kpi{
+    padding:16px;
+    background:#fff;
+    border:1px solid rgba(217,225,236,.95);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    min-width:0;
+  }
+  .name{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.35;
+  }
+  .value{
+    margin-top:8px;
+    font-size:22px;
+    font-weight:850;
+    letter-spacing:-.25px;
+    overflow-wrap:anywhere;
+  }
+  .sub{
+    margin-top:6px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.5;
+  }
+  .chart-card{padding:18px}
+  .chart-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .chart-head p{
+    margin:4px 0 0;
+    color:var(--muted);
+    line-height:1.55;
+    font-size:13px;
+  }
+  .legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+  .legend-item{display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+  .swatch{width:18px;height:4px;border-radius:999px;background:#111}
+  .total{background:var(--blue)} .con{background:var(--green)} .op{background:var(--orange)} .time{background:var(--purple)} .flow{background:#be123c} .vel{background:#111827}
+  canvas{
+    width:100%;
+    height:440px;
+    border:1px solid var(--line);
+    border-radius:15px;
+    background:#fbfdff;
+  }
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+  }
+  .grid13{
+    display:grid;
+    grid-template-columns:1.08fr .92fr;
+    gap:18px;
+  }
+  .card-pad{padding:18px}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    overflow:hidden;
+    border-radius:12px;
+  }
+  th,td{
+    padding:10px 9px;
+    border-bottom:1px solid var(--line);
+    text-align:left;
+    vertical-align:top;
+  }
+  th{background:#f3f6fb;color:#374151;font-weight:850}
+  tr:last-child td{border-bottom:0}
+  .status{
+    display:inline-flex;
+    border-radius:999px;
+    padding:5px 9px;
+    font-size:12px;
+    font-weight:850;
+    white-space:nowrap;
+  }
+  .status.ok{background:#dcfce7;color:var(--ok)}
+  .status.warn{background:#fef3c7;color:#a16207}
+  .status.bad{background:#fee2e2;color:#b91c1c}
+  .formula{
+    background:#f8fafc;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
+    line-height:1.85;
+    color:#263244;
+    font-size:13px;
+  }
+  code{
+    background:#eef2ff;
+    color:#1e3a8a;
+    padding:2px 6px;
+    border-radius:7px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  }
+  .formula-row{margin:2px 0}
+  ul{
+    margin:8px 0 0 19px;
+    padding:0;
+    color:#334155;
+    font-size:13px;
+    line-height:1.75;
+  }
+  .small-metrics{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;
+    margin-top:12px;
+  }
+  .metric{
+    border:1px solid var(--line);
+    background:#fbfdff;
+    border-radius:12px;
+    padding:10px;
+  }
+  .metric .mname{font-size:12px;color:var(--muted);line-height:1.35}
+  .metric .mval{font-weight:850;margin-top:5px;font-size:15px}
+  .note-box{
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    color:#7c2d12;
+    border-radius:14px;
+    padding:12px 14px;
+    font-size:13px;
+    line-height:1.65;
+    margin-top:12px;
+  }
+  @media(max-width:1180px){
+    main{grid-template-columns:1fr}
+    .inputs{position:static;max-height:none}
+    .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid2,.grid13{grid-template-columns:1fr}
+  }
+  @media(max-width:720px){
+    header,main{padding-left:16px;padding-right:16px}
+    .kpis{grid-template-columns:1fr}
+    label{grid-template-columns:1fr}
+    .model-banner{grid-template-columns:1fr}
+    .small-metrics{grid-template-columns:1fr 1fr}
+    canvas{height:360px}
+  }
+  @media(max-width:480px){
+    .small-metrics{grid-template-columns:1fr}
+  }
+
+  /* 计算过程响应动画 */
+  .calc-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.28);
+    backdrop-filter:blur(3px);
+    z-index:999;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+  }
+  .calc-overlay.show{display:flex}
+  .calc-box{
+    width:min(520px,100%);
+    background:#fff;
+    border:1px solid rgba(226,232,240,.95);
+    border-radius:22px;
+    box-shadow:0 24px 70px rgba(15,23,42,.22);
+    padding:22px;
+  }
+  .calc-top{
+    display:flex;
+    gap:14px;
+    align-items:center;
+  }
+  .spinner{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    border:4px solid #dbeafe;
+    border-top-color:#2563eb;
+    animation:spin .85s linear infinite;
+    flex:0 0 auto;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .calc-title{
+    font-weight:850;
+    font-size:18px;
+  }
+  .calc-desc{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:5px;
+    line-height:1.55;
+  }
+  .calc-steps{
+    display:grid;
+    gap:8px;
+    margin-top:18px;
+  }
+  .calc-step{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    color:#64748b;
+    font-size:13px;
+  }
+  .calc-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#cbd5e1;
+  }
+  .calc-step.active{
+    color:#1d4ed8;
+    font-weight:750;
+  }
+  .calc-step.active .calc-dot{
+    background:#2563eb;
+    box-shadow:0 0 0 5px rgba(37,99,235,.13);
+  }
+  .progress-wrap{
+    margin-top:18px;
+    height:10px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-bar{
+    width:0%;
+    height:100%;
+    background:linear-gradient(90deg,#2563eb,#0f766e);
+    border-radius:999px;
+    transition:width .18s ease;
+  }
+  .calc-inline{
+    display:none;
+    align-items:center;
+    gap:8px;
+    color:#1d4ed8;
+    font-weight:800;
+    font-size:13px;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    border-radius:999px;
+    padding:7px 11px;
+    white-space:nowrap;
+  }
+  .calc-inline.show{display:inline-flex}
+  .calc-inline.dirty{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+  .mini-spinner{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    border:2px solid #bfdbfe;
+    border-top-color:#2563eb;
+    animation:spin .75s linear infinite;
+  }
+
+
+  /* 图表更新提示 */
+  canvas.waiting-update{
+    opacity:.72;
+    filter:saturate(.75);
+  }
+  canvas.chart-updated{
+    animation:chartFlash .9s ease;
+  }
+  @keyframes chartFlash{
+    0%{box-shadow:0 0 0 0 rgba(37,99,235,.0); border-color:#93c5fd}
+    35%{box-shadow:0 0 0 5px rgba(37,99,235,.20); border-color:#2563eb}
+    100%{box-shadow:0 0 0 0 rgba(37,99,235,.0); border-color:var(--line)}
+  }
+  .update-toast{
+    position:fixed;
+    right:22px;
+    bottom:22px;
+    z-index:1000;
+    display:none;
+    background:#ecfdf5;
+    color:#065f46;
+    border:1px solid #a7f3d0;
+    border-radius:999px;
+    padding:10px 14px;
+    font-size:13px;
+    font-weight:850;
+    box-shadow:0 12px 30px rgba(15,23,42,.13);
+  }
+  .update-toast.show{display:block;animation:toastInOut 1.5s ease both}
+  @keyframes toastInOut{
+    0%{opacity:0;transform:translateY(8px)}
+    18%{opacity:1;transform:translateY(0)}
+    78%{opacity:1;transform:translateY(0)}
+    100%{opacity:0;transform:translateY(8px)}
+  }
+
+</style>
+</head>
+<body>
+
+<div class="calc-overlay" id="calcOverlay" aria-live="polite" aria-label="模型正在计算">
+  <div class="calc-box">
+    <div class="calc-top">
+      <div class="spinner"></div>
+      <div>
+        <div class="calc-title">模型正在重新计算</div>
+        <div class="calc-desc" id="calcDesc">参数已更新，正在代入报告标定模型并刷新图表。</div>
+      </div>
+    </div>
+    <div class="calc-steps">
+      <div class="calc-step active" id="step1"><span class="calc-dot"></span><span>读取参数并更新水力边界</span></div>
+      <div class="calc-step" id="step2"><span class="calc-dot"></span><span>计算 A*、t(A)、Q(A)、v(A)</span></div>
+      <div class="calc-step" id="step3"><span class="calc-dot"></span><span>校核时间、空间与流速约束</span></div>
+      <div class="calc-step" id="step4"><span class="calc-dot"></span><span>刷新曲线、柱状图与对比表</span></div>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="calcProgress"></div></div>
+  </div>
+</div>
+
+<header>
+  <h1>三峡船闸输水廊道断面尺寸多目标优化分析网页模拟器</h1>
+  
+  <p class="subtitle">
+    本模拟器依据《三峡船闸输水廊道断面尺寸多目标优化分析》报告构建，用于展示廊道断面面积 A 对充泄水时间、
+    输水流量、廊道流速、建设投资、运营延误损失及全生命周期总成本的影响。
+    系统采用报告标定参数，并支持修改闸室尺寸、造价系数、运营损失系数和安全约束。
+  </p>
+  <p class="subtitle">
+    默认基准值为：水力控制下限 A<sub>水力</sub>=68.91 m²，理论经济最优断面 A<sup>*</sup>=92.16 m²，
+    开挖空间上限 A<sub>max</sub>=300 m²；对应总成本约为 62.82、62.19、73.71 亿元。
+    当前版本中，L、B、H<sub>k</sub> 会联动更新 V、C<sub>t</sub>、K<sub>0</sub>、A<sup>*</sup> 与总成本。
+    修改参数后，图表会进入“待更新”状态，按 Enter 或点击“重新计算”后刷新。
+  </p>
+</header>
+
+<main>
+  <aside class="panel inputs">
+    <div class="section">
+      <h2>报告标定参数</h2>
+      <p class="hint">默认值已按报告第 4 章图表与第 4.3 节对比表标定，单位采用“亿元”和“m²”。</p>
+    </div>
+
+    <div class="section">
+      <h3>一、闸室与水力边界</h3>
+      <label><span>闸室长度 L（m）</span><input id="L" type="number" step="1" value="280"></label>
+      <label><span>闸室宽度 B（m）</span><input id="B" type="number" step="0.1" value="34"></label>
+      <label><span>槛上水深 H<sub>k</sub>（m）</span><input id="Hk" type="number" step="0.1" value="5"></label>
+      <label><span>最大工作水头 ΔH（m）</span><input id="dH" type="number" step="0.1" value="45.2"></label>
+      <label><span>最长输水时长 t<sub>max</sub>（min）</span><input id="tmax" type="number" step="0.1" value="13"></label>
+      <label><span>水力下限 A<sub>min</sub>（m²）</span><input id="Amin" type="number" step="0.01" value="68.91"></label>
+      <label><span>空间上限 A<sub>max</sub>（m²）</span><input id="Amax" type="number" step="1" value="300"></label>
+      <p class="hint">输水时长采用报告曲线标定并与闸室体积联动：t(A)=C<sub>t</sub>/A，其中 C<sub>t</sub>=A<sub>min</sub>·t<sub>max</sub>·(V/V<sub>ref</sub>)。</p>
+    </div>
+
+    <div class="section">
+      <h3>二、流量与流速标定</h3>
+      <label><span>流量线性系数 q<sub>coef</sub><br><small>Q=qcoef·A</small></span><input id="qcoef" type="number" step="0.0001" value="1.2598"></label>
+      <label><span>恒定输水总流量 Q<sub>v</sub>（m³/s）<br><small>v=Qv/A</small></span><input id="Qv" type="number" step="0.01" value="368.64"></label>
+      <label><span>设计基准流速 v<sub>base</sub>（m/s）</span><input id="vbase" type="number" step="0.1" value="4"></label>
+      <label><span>规范安全流速 v<sub>max</sub>（m/s）</span><input id="vmax" type="number" step="0.1" value="6"></label>
+      <p class="hint">报告中 A-Q 图采用 Q 与 A 线性增长；A-v 图采用恒定输水总流量下 v 与 A 反比例递减。</p>
+    </div>
+
+    <div class="section">
+      <h3>三、经济模型参数</h3>
+      <label><span>单位面积造价 a（亿元/m²）</span><input id="a" type="number" step="0.001" value="0.08"></label>
+      <label><span>固定投资 C<sub>fix</sub>（亿元）</span><input id="Cfix" type="number" step="0.01" value="47.45"></label>
+      <label><span>运营损失综合常数 K<sub>0</sub>（亿元·m²）</span><input id="K0" type="number" step="0.01" value="679.48"></label>
+      <p class="hint">建设成本 Ccon=a·A+Cfix；运营折现损失 Cop=K0/A；总成本 TC=Ccon+Cop。</p>
+    </div>
+
+    <div class="section">
+      <h3>四、图表范围与导出</h3>
+      <label><span>曲线起点 A<sub>plot,min</sub>（m²）</span><input id="AplotMin" type="number" step="1" value="40"></label>
+      <label><span>曲线终点 A<sub>plot,max</sub>（m²）</span><input id="AplotMax" type="number" step="1" value="330"></label>
+      <div class="btns">
+        <button class="primary" id="calcBtn">重新计算</button>
+        <button id="resetBtn">恢复报告默认值</button>
+        <button id="csvBtn">导出 CSV</button>
+      </div>
+    </div>
+  </aside>
+
+  <section class="dashboard">
+    <div class="panel model-banner">
+      <div>
+        <strong>核心模型：TC(A)=aA+C<sub>fix</sub>+K<sub>0</sub>/A，A<sup>*</sup>=√(K<sub>0</sub>/a)</strong>
+        <p>当理论 A<sup>*</sup> 位于 [A<sub>min</sub>, A<sub>max</sub>] 且满足流速安全约束时，推荐 A=A<sup>*</sup>；否则取约束边界。双侧对称廊道总面积为 A<sub>总</sub>=2A。</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><span class="tag">报告数据标定版 · 图表防重叠</span><span class="calc-inline" id="calcInline"><span class="mini-spinner"></span>正在计算</span></div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="name">理论经济最优断面 A*</div>
+        <div class="value" id="AstarOut">—</div>
+        <div class="sub">由 √(K0/a) 自动计算。</div>
+      </div>
+      <div class="kpi">
+        <div class="name">推荐实施断面 A</div>
+        <div class="value" id="ArecOut">—</div>
+        <div class="sub" id="recSub">综合时间、空间、流速约束。</div>
+      </div>
+      <div class="kpi">
+        <div class="name">推荐方案充泄水时长</div>
+        <div class="value" id="tOut">—</div>
+        <div class="sub">报告最优断面约 9.7 min。</div>
+      </div>
+      <div class="kpi">
+        <div class="name">推荐方案总成本现值</div>
+        <div class="value" id="TCOut">—</div>
+        <div class="sub">报告最优值约 62.19 亿元。</div>
+      </div>
+    </div>
+
+    <div class="panel card-pad">
+      <h2>关键结果</h2>
+      <div class="small-metrics">
+        <div class="metric"><div class="mname">闸室有效水体容积 V</div><div class="mval" id="Vout">—</div></div>
+        <div class="metric"><div class="mname">时间常数 Ct</div><div class="mval" id="CtOut">—</div></div><div class="metric"><div class="mname">体积缩放系数 V/Vref</div><div class="mval" id="scaleOut">—</div></div>
+        <div class="metric"><div class="mname">推荐断面输水流量 Q</div><div class="mval" id="Qout">—</div></div>
+        <div class="metric"><div class="mname">推荐断面廊道流速 v</div><div class="mval" id="vOut">—</div></div>
+        <div class="metric"><div class="mname">一次性建设投资</div><div class="mval" id="CconOut">—</div></div>
+        <div class="metric"><div class="mname">百年运营延误折现损失</div><div class="mval" id="CopOut">—</div></div>
+        <div class="metric"><div class="mname">双侧廊道总面积 A总</div><div class="mval" id="AtotalOut">—</div></div><div class="metric"><div class="mname">生效水力下限 A水力</div><div class="mval" id="AeffOut">—</div></div>
+        <div class="metric"><div class="mname">约束状态</div><div class="mval" id="statusOut">—</div></div>
+      </div>
+      <div class="note-box">
+        注：为复现报告图表，页面分别采用“t(A)=Ct/A”“Q(A)=qcoef·A”和“v(A)=Qv/A”三条经验标定关系；其中 Ct 与 K0 已按闸室体积 V/Vref 联动。
+        这适合做报告展示与方案比选；若用于正式工程设计，应进一步统一流量—时间—体积之间的水量连续关系，并通过物理模型或 CFD 校核。
+      </div>
+    </div>
+
+    <div class="panel chart-card">
+      <div class="chart-head">
+        <div>
+          <h2>全生命周期成本—断面面积曲线</h2>
+          <p>蓝线为总成本 TC，绿线为建设成本，橙线为百年运营延误折现损失。红色竖线为理论经济最优断面，图中的圆点均表示该最优断面在对应曲线上的交点。</p>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="swatch total"></span>TC</span>
+          <span class="legend-item"><span class="swatch con"></span>Ccon</span>
+          <span class="legend-item"><span class="swatch op"></span>Cop</span>
+        </div>
+      </div>
+      <canvas id="costCanvas"></canvas>
+    </div>
+
+    <div class="grid2">
+      <div class="panel chart-card">
+        <div class="chart-head">
+          <div>
+            <h2>A-t 充泄水时长曲线</h2>
+            <p>断面面积越大，充泄水时长越短；水平虚线为 tmax=13 min。</p>
+          </div>
+          <div class="legend"><span class="legend-item"><span class="swatch time"></span>t(A)</span></div>
+        </div>
+        <canvas id="timeCanvas"></canvas>
+      </div>
+
+      <div class="panel chart-card">
+        <div class="chart-head">
+          <div>
+            <h2>A-Q 输水流量曲线</h2>
+            <p>根据报告图表，输水流量与廊道断面面积呈正比例线性增长。</p>
+          </div>
+          <div class="legend"><span class="legend-item"><span class="swatch flow"></span>Q(A)</span></div>
+        </div>
+        <canvas id="flowCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel chart-card">
+        <div class="chart-head">
+          <div>
+            <h2>A-v 廊道平均流速曲线</h2>
+            <p>按报告恒定输水总流量标定，流速与断面面积呈反比例递减。</p>
+          </div>
+          <div class="legend"><span class="legend-item"><span class="swatch vel"></span>v(A)</span></div>
+        </div>
+        <canvas id="velocityCanvas"></canvas>
+      </div>
+
+      <div class="panel chart-card">
+        <div class="chart-head">
+          <div>
+            <h2>典型方案成本堆叠柱状图</h2>
+            <p>复现偏小断面、理论最优断面、偏大断面的建设成本与运营延误损失构成。</p>
+          </div>
+          <div class="legend">
+            <span class="legend-item"><span class="swatch con"></span>建设投资</span>
+            <span class="legend-item"><span class="swatch op"></span>运营损失</span>
+          </div>
+        </div>
+        <canvas id="barCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="grid13">
+      <div class="panel card-pad">
+        <h2>典型断面方案综合对比</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>方案</th>
+              <th>A<br>m²</th>
+              <th>t<br>min</th>
+              <th>Q<br>m³/s</th>
+              <th>v<br>m/s</th>
+              <th>Ccon<br>亿元</th>
+              <th>Cop<br>亿元</th>
+              <th>TC<br>亿元</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody id="tableRows"></tbody>
+        </table>
+      </div>
+
+      <div class="panel card-pad">
+        <h2>网页使用说明</h2>
+        <div class="formula">
+          <div class="formula-row">1. 单条廊道断面面积：<code>A</code>，双侧对称廊道总面积：<code>A总=2A</code>。</div>
+          <div class="formula-row">2. 闸室水体容积：<code>V=L×B×Hk=47600 m³</code>。</div>
+          <div class="formula-row">3. 充泄水时长：<code>t(A)=Ct/A</code>，默认 Ct=68.91×13。</div>
+          <div class="formula-row">4. 输水流量：<code>Q(A)=1.2598A</code>。</div>
+          <div class="formula-row">5. 廊道流速：<code>v(A)=368.64/A</code>。</div>
+          <div class="formula-row">6. 建设成本：<code>Ccon=0.08A+47.45</code>。</div>
+          <div class="formula-row">7. 运营损失：<code>Cop=679.48/A</code>。</div>
+          <div class="formula-row">8. 总成本：<code>TC=Ccon+Cop</code>。</div>
+        </div>
+        <ul>
+          <li>默认参数可复现报告中的典型断面；若推荐实施断面与理论最优断面一致，表格中将自动合并显示，避免重复。修改 L、B、Hk 后，页面会按 V/Vref 联动更新最优断面和成本。</li>
+          <li>若修改单位造价 a 或运营常数 K0，理论最优 A* 会自动变化。</li>
+          <li>若 A* 超出可行区间，网页会将推荐面积修正到约束边界。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const defaults = {
+  L:280, B:34, Hk:5, dH:45.2,
+  tmax:13, Amin:68.91, Amax:300,
+  qcoef:1.2598, Qv:368.64, vbase:4, vmax:6,
+  a:0.08, Cfix:47.45, K0:679.48,
+  AplotMin:40, AplotMax:330
+};
+const ids = Object.keys(defaults);
+let latestData = [];
+
+function getVal(id){
+  const x = parseFloat(document.getElementById(id).value);
+  return Number.isFinite(x) ? x : defaults[id];
+}
+function setVal(id,x){ document.getElementById(id).value = x; }
+function fmt(x,d=2){
+  if(!Number.isFinite(x)) return "—";
+  return x.toLocaleString("zh-CN",{maximumFractionDigits:d,minimumFractionDigits:d});
+}
+function fmt0(x){
+  if(!Number.isFinite(x)) return "—";
+  return x.toLocaleString("zh-CN",{maximumFractionDigits:0});
+}
+function params(){
+  const p = {};
+  ids.forEach(id => p[id] = getVal(id));
+  p.L = Math.max(p.L,0.001);
+  p.B = Math.max(p.B,0.001);
+  p.Hk = Math.max(p.Hk,0.001);
+  p.tmax = Math.max(p.tmax,0.001);
+  p.Amin = Math.max(p.Amin,0.001);
+  p.Amax = Math.max(p.Amax,p.Amin+0.001);
+  p.AplotMin = Math.max(p.AplotMin,0.001);
+  p.AplotMax = Math.max(p.AplotMax,p.AplotMin+0.001);
+  p.a = Math.max(p.a,0.000001);
+  p.K0 = Math.max(p.K0,0.000001);
+  p.vmax = Math.max(p.vmax,0.000001);
+  return p;
+}
+function derived(p){
+  const V = p.L*p.B*p.Hk;
+  const Vref = defaults.L * defaults.B * defaults.Hk;
+  const volumeScale = V / Vref;
+  // 报告默认 Ct=Amin*tmax；修改闸室尺寸后，按体积比例联动修正。
+  const Ct = p.Amin * p.tmax * volumeScale;
+  // 运营延误损失与输水时间同向变化，因此 K0 按同一体积比例联动。
+  const K0eff = p.K0 * volumeScale;
+  const Astar = Math.sqrt(K0eff / p.a);
+  const AminEff = Ct / p.tmax;
+  return {V,Vref,volumeScale,Ct,K0eff,Astar,AminEff};
+}
+function model(A,p,d){
+  const t = d.Ct/A;
+  const Q = p.qcoef*A;
+  const v = p.Qv/A;
+  const Ccon = p.a*A + p.Cfix;
+  const Cop = d.K0eff/A;
+  const TC = Ccon + Cop;
+  const okT = t <= p.tmax;
+  const okA = A >= d.AminEff && A <= p.Amax;
+  const okV = v <= p.vmax;
+  return {A,Atotal:2*A,t,Q,v,Ccon,Cop,TC,okT,okA,okV};
+}
+function clamp(x,lo,hi){ return Math.min(Math.max(x,lo),hi); }
+function recommend(p,d){
+  // 下限同时考虑报告水力下限随体积变化后的 A水力，以及流速约束下限。
+  let lo = d.AminEff;
+  const hi = p.Amax;
+  const Av = p.Qv / p.vmax;
+  lo = Math.max(lo, Av);
+  const A = clamp(d.Astar, lo, hi);
+  const feasible = lo <= hi;
+  return {A,lo,hi,feasible};
+}
+function sample(p,d){
+  const arr=[];
+  const n=360;
+  for(let i=0;i<n;i++){
+    const A = p.AplotMin + (p.AplotMax-p.AplotMin)*i/(n-1);
+    arr.push(model(A,p,d));
+  }
+  return arr;
+}
+function status(m){
+  if(m.okT && m.okA && m.okV) return '<span class="status ok">可行</span>';
+  const f=[];
+  if(!m.okT) f.push("超时");
+  if(!m.okA) f.push("越界");
+  if(!m.okV) f.push("流速超限");
+  return '<span class="status bad">'+f.join("/")+'</span>';
+}
+function updateOutputs(p,d,rec,m){
+  document.getElementById("AstarOut").textContent = fmt(d.Astar,2) + " m²";
+  document.getElementById("ArecOut").textContent = fmt(rec.A,2) + " m²";
+  document.getElementById("tOut").textContent = fmt(m.t,2) + " min";
+  document.getElementById("TCOut").textContent = fmt(m.TC,2) + " 亿元";
+  document.getElementById("Vout").textContent = fmt0(d.V) + " m³";
+  document.getElementById("CtOut").textContent = fmt(d.Ct,2) + " min·m²";
+  document.getElementById("scaleOut").textContent = fmt(d.volumeScale,3);
+  document.getElementById("Qout").textContent = fmt(m.Q,2) + " m³/s";
+  document.getElementById("vOut").textContent = fmt(m.v,2) + " m/s";
+  document.getElementById("CconOut").textContent = fmt(m.Ccon,2) + " 亿元";
+  document.getElementById("CopOut").textContent = fmt(m.Cop,2) + " 亿元";
+  document.getElementById("AtotalOut").textContent = fmt(m.Atotal,2) + " m²";
+  document.getElementById("AeffOut").textContent = fmt(d.AminEff,2) + " m²";
+  document.getElementById("statusOut").innerHTML = status(m);
+
+  let s = "";
+  if(!rec.feasible){
+    s = "约束区间不可行，请提高 Amax 或放宽流速约束。";
+  }else if(Math.abs(rec.A-d.Astar)<1e-4){
+    s = "理论最优断面位于可行区间，可直接作为推荐断面。";
+  }else if(rec.A > d.Astar){
+    s = "理论最优断面偏小，已按水力/安全下限修正。";
+  }else{
+    s = "理论最优断面超过空间上限，已修正至 Amax。";
+  }
+  document.getElementById("recSub").textContent = s;
+}
+function table(p,d,rec){
+  const cases = [
+    ["水力控制下限 A<sub>水力</sub>", d.AminEff],
+    ["理论最优断面 A*", d.Astar]
+  ];
+
+  // 只有当推荐实施断面与理论最优断面不相同时，才单独显示推荐行
+  if(Math.abs(rec.A - d.Astar) > 1e-4){
+    cases.push(["推荐实施断面", rec.A]);
+  }
+
+  cases.push(["偏大断面 A<sub>max</sub>", p.Amax]);
+
+  const rows=[];
+  const seen=new Set();
+  for(const [name,A] of cases){
+    const key=A.toFixed(4);
+    if(seen.has(key)) continue;
+    seen.add(key);
+    const m=model(A,p,d);
+    rows.push(`<tr>
+      <td>${name}</td>
+      <td>${fmt(A,2)}</td>
+      <td>${fmt(m.t,2)}</td>
+      <td>${fmt(m.Q,2)}</td>
+      <td>${fmt(m.v,2)}</td>
+      <td>${fmt(m.Ccon,2)}</td>
+      <td>${fmt(m.Cop,2)}</td>
+      <td>${fmt(m.TC,2)}</td>
+      <td>${status(m)}</td>
+    </tr>`);
+  }
+  document.getElementById("tableRows").innerHTML=rows.join("");
+}
+function drawChart(canvas,data,series,yLabel,markers={},opts={}){
+  const ctx=canvas.getContext("2d");
+  const rect=canvas.getBoundingClientRect();
+  const ratio=window.devicePixelRatio||1;
+  canvas.width=rect.width*ratio; canvas.height=rect.height*ratio;
+  ctx.setTransform(ratio,0,0,ratio,0,0);
+  const w=rect.width,h=rect.height;
+  ctx.clearRect(0,0,w,h);
+
+  // 顶部为最佳断面数据标记预留空间
+  const pad={l:66,r:34,t:56,b:56};
+  const pw=w-pad.l-pad.r, ph=h-pad.t-pad.b;
+  const xs=data.map(d=>d.A);
+  const ys=[];
+  series.forEach(s=>data.forEach(d=>ys.push(d[s.key])));
+  if(opts.yLine!==undefined) ys.push(opts.yLine);
+  if(opts.yLine2!==undefined) ys.push(opts.yLine2);
+
+  const xmin=Math.min(...xs),xmax=Math.max(...xs);
+  let ymin=Math.min(...ys),ymax=Math.max(...ys);
+  if(Math.abs(ymax-ymin)<1e-9){ymax+=1;ymin-=1}
+  const span=ymax-ymin; ymin-=span*.08; ymax+=span*.10;
+  const X=x=>pad.l+(x-xmin)/(xmax-xmin)*pw;
+  const Y=y=>pad.t+ph-(y-ymin)/(ymax-ymin)*ph;
+
+  // 可行区间浅色背景
+  if(opts.Amin !== undefined && opts.Amax !== undefined){
+    const x1=Math.max(pad.l, X(opts.Amin));
+    const x2=Math.min(w-pad.r, X(opts.Amax));
+    if(x2>x1){
+      ctx.fillStyle="rgba(245,158,11,.10)";
+      ctx.fillRect(x1,pad.t,x2-x1,ph);
+    }
+  }
+
+  // 坐标轴与网格
+  const tickCount=4;
+  ctx.font="12px -apple-system,BlinkMacSystemFont,Segoe UI,Microsoft YaHei,Arial";
+  ctx.strokeStyle="#e5e7eb"; ctx.lineWidth=1; ctx.fillStyle="#6b7280";
+  ctx.textAlign="right"; ctx.textBaseline="middle";
+  for(let i=0;i<=tickCount;i++){
+    const y=pad.t+ph*i/tickCount;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    const val=ymax-(ymax-ymin)*i/tickCount;
+    ctx.fillText(fmt(val, opts.yDecimals ?? 0),pad.l-9,y);
+  }
+
+  ctx.textAlign="center"; ctx.textBaseline="top";
+  for(let i=0;i<=tickCount;i++){
+    const x=pad.l+pw*i/tickCount;
+    ctx.beginPath(); ctx.moveTo(x,pad.t); ctx.lineTo(x,pad.t+ph); ctx.stroke();
+    const val=xmin+(xmax-xmin)*i/tickCount;
+    ctx.fillText(fmt0(val),x,pad.t+ph+14);
+  }
+
+  ctx.strokeStyle="#94a3b8"; ctx.lineWidth=1.3;
+  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+ph); ctx.lineTo(w-pad.r,pad.t+ph); ctx.stroke();
+
+  ctx.save(); ctx.translate(16,pad.t+ph/2); ctx.rotate(-Math.PI/2);
+  ctx.fillStyle="#475569"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(yLabel,0,0);
+  ctx.restore();
+  ctx.fillStyle="#475569"; ctx.textAlign="center"; ctx.textBaseline="top";
+  ctx.fillText("单条输水廊道断面面积 A（m²）",pad.l+pw/2,h-27);
+
+  // 横线：所有数据标记与横线保持完全一致的垂直距离
+  const hLabelOffset = 14;  // 标签基线距离横线的固定距离
+  function hline(yval,label,color){
+    const y=Y(yval);
+    ctx.strokeStyle=color; ctx.setLineDash([7,6]); ctx.lineWidth=1.3;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.setLineDash([]);
+    const ty=Math.max(pad.t+12, Math.min(y - hLabelOffset, pad.t+ph-10));
+    ctx.fillStyle=color;
+    ctx.font="12px -apple-system,BlinkMacSystemFont,Segoe UI,Microsoft YaHei,Arial";
+    ctx.textAlign="center";
+    ctx.textBaseline="bottom";
+    ctx.fillText(label,pad.l+pw/2,ty);
+  }
+  if(opts.yLine!==undefined) hline(opts.yLine,opts.yLabel||fmt(opts.yLine,1),opts.yColor||"#ef4444");
+  if(opts.yLine2!==undefined) hline(opts.yLine2,opts.yLabel2||fmt(opts.yLine2,1),opts.yColor2||"#f59e0b");
+
+  // 曲线
+  for(const s of series){
+    ctx.strokeStyle=s.color; ctx.lineWidth=s.width||2.3; ctx.setLineDash(s.dash||[]);
+    ctx.beginPath();
+    data.forEach((d,i)=>{
+      const x=X(d.A),y=Y(d[s.key]);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // 竖线：仅保留最佳断面 A* 的数据标签；标签带单位且不加外框
+  const verticals = [];
+  if(markers.Amin) verticals.push({x:markers.Amin,color:"#0f766e",showLabel:false});
+  if(markers.Astar) verticals.push({x:markers.Astar,color:"#dc2626",showLabel:true,label:fmt(markers.Astar,1) + " m²"});
+  if(markers.Amax) verticals.push({x:markers.Amax,color:"#7c3aed",showLabel:false});
+
+  verticals.forEach(mk=>{
+    const x=X(mk.x);
+    if(x<pad.l || x>w-pad.r) return;
+    ctx.strokeStyle=mk.color; ctx.setLineDash([4,5]); ctx.lineWidth=1.3;
+    ctx.beginPath(); ctx.moveTo(x,pad.t); ctx.lineTo(x,pad.t+ph); ctx.stroke();
+    ctx.setLineDash([]);
+
+    if(mk.showLabel){
+      ctx.fillStyle=mk.color;
+      ctx.font="12px -apple-system,BlinkMacSystemFont,Segoe UI,Microsoft YaHei,Arial";
+      ctx.textAlign="center";
+      ctx.textBaseline="bottom";
+      ctx.fillText(mk.label, x, pad.t-8);
+    }
+  });
+
+  // 关键交点：默认显示在指定曲线上的对应点。
+  if(markers.point){
+    const key=opts.pointKey||series[0].key;
+    const pointXValue = (opts.pointX === "Astar" && markers.Astar) ? markers.Astar : markers.point.A;
+    const pointYValue = (opts.pointYValue !== undefined) ? opts.pointYValue : markers.point[key];
+    const x=X(pointXValue), y=Y(pointYValue);
+
+    ctx.fillStyle=opts.pointColor || "#111827";
+    ctx.beginPath();
+    ctx.arc(x,y,5.5,0,Math.PI*2);
+    ctx.fill();
+
+    if(opts.pointStroke){
+      ctx.strokeStyle=opts.pointStroke;
+      ctx.lineWidth=1.4;
+      ctx.stroke();
+    }
+  }
+}
+
+function drawBar(canvas,bars){
+  const ctx=canvas.getContext("2d");
+  const rect=canvas.getBoundingClientRect();
+  const ratio=window.devicePixelRatio||1;
+  canvas.width=rect.width*ratio; canvas.height=rect.height*ratio;
+  ctx.setTransform(ratio,0,0,ratio,0,0);
+  const w=rect.width,h=rect.height;
+  ctx.clearRect(0,0,w,h);
+
+  const pad={l:60,r:30,t:52,b:86};
+  const pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+  const maxY=Math.max(...bars.map(b=>b.Ccon+b.Cop))*1.18;
+  const Y=y=>pad.t+ph-y/maxY*ph;
+
+  function roundRect(x,y,width,height,r){
+    const rr=Math.min(r,width/2,height/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr,y);
+    ctx.arcTo(x+width,y,x+width,y+height,rr);
+    ctx.arcTo(x+width,y+height,x,y+height,rr);
+    ctx.arcTo(x,y+height,x,y,rr);
+    ctx.arcTo(x,y,x+width,y,rr);
+    ctx.closePath();
+  }
+
+  function labelBox(text,x,y){
+    ctx.font="12px -apple-system,BlinkMacSystemFont,Segoe UI,Microsoft YaHei,Arial";
+    const tw=ctx.measureText(text).width;
+    const bw=tw+12,bh=21;
+    const bx=Math.max(6,Math.min(x-bw/2,w-bw-6));
+    const by=Math.max(6,Math.min(y,h-bh-6));
+    ctx.fillStyle="rgba(255,255,255,.95)";
+    roundRect(bx,by,bw,bh,8);
+    ctx.fill();
+    ctx.strokeStyle="#cbd5e1";
+    ctx.lineWidth=1;
+    ctx.stroke();
+    ctx.fillStyle="#111827";
+    ctx.textAlign="left";
+    ctx.textBaseline="middle";
+    ctx.fillText(text,bx+6,by+bh/2);
+  }
+
+  ctx.font="12px -apple-system,BlinkMacSystemFont,Segoe UI,Microsoft YaHei,Arial";
+  ctx.strokeStyle="#e5e7eb"; ctx.fillStyle="#6b7280"; ctx.textAlign="right"; ctx.textBaseline="middle";
+  const tickCount=4;
+  for(let i=0;i<=tickCount;i++){
+    const y=pad.t+ph*i/tickCount;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.fillText(fmt(maxY*(1-i/tickCount),1),pad.l-8,y);
+  }
+  ctx.strokeStyle="#94a3b8"; ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+ph); ctx.lineTo(w-pad.r,pad.t+ph); ctx.stroke();
+  ctx.save(); ctx.translate(16,pad.t+ph/2); ctx.rotate(-Math.PI/2); ctx.fillStyle="#475569"; ctx.textAlign="center"; ctx.fillText("成本（亿元）",0,0); ctx.restore();
+
+  const slot=pw/bars.length;
+  const bw=Math.min(58,slot*.45);
+  bars.forEach((b,i)=>{
+    const center=pad.l+slot*(i+.5);
+    const x=center-bw/2;
+    const yCon=Y(b.Ccon);
+    const yTotal=Y(b.Ccon+b.Cop);
+
+    ctx.fillStyle="#0f766e"; ctx.fillRect(x,yCon,bw,pad.t+ph-yCon);
+    ctx.fillStyle="#b45309"; ctx.fillRect(x,yTotal,bw,yCon-yTotal);
+
+    // 顶部数值标签交错显示，避免遮挡。
+    labelBox(fmt(b.Ccon+b.Cop,2)+" 亿",center,yTotal-29-(i%2)*14);
+
+    ctx.fillStyle="#475569"; ctx.textAlign="center"; ctx.textBaseline="top";
+    ctx.fillText(b.name,center,pad.t+ph+14);
+    ctx.fillText("A="+fmt(b.A,1),center,pad.t+ph+34);
+  });
+}
+
+function recalc(){
+  const p=params();
+  const d=derived(p);
+  const rec=recommend(p,d);
+  const m=model(rec.A,p,d);
+  const data=sample(p,d);
+  latestData=data;
+  updateOutputs(p,d,rec,m);
+  table(p,d,rec);
+  const markers={Amin:d.AminEff,Astar:d.Astar,Amax:p.Amax,point:m};
+
+  drawChart(document.getElementById("costCanvas"),data,[
+    {key:"TC",color:"#2563eb",width:2.8},
+    {key:"Ccon",color:"#0f766e",width:2.1},
+    {key:"Cop",color:"#b45309",width:2.1}
+  ],"成本现值（亿元）",markers,{
+    Amin:d.AminEff,
+    Amax:p.Amax,
+    pointKey:"TC",
+    pointX:"Astar",
+    pointYValue:model(d.Astar,p,d).TC,
+    pointColor:"#dc2626",
+    pointStroke:"#ffffff",
+    yDecimals:1
+  });
+
+  drawChart(document.getElementById("timeCanvas"),data,[
+    {key:"t",color:"#7c3aed",width:2.8}
+  ],"充泄水时长（min）",markers,{
+    Amin:d.AminEff,
+    Amax:p.Amax,
+    pointKey:"t",
+    pointX:"Astar",
+    pointYValue:model(d.Astar,p,d).t,
+    pointColor:"#dc2626",
+    pointStroke:"#ffffff",
+    yLine:p.tmax,
+    yLabel:"tmax="+fmt(p.tmax,1)+" min",
+    yDecimals:1
+  });
+
+  drawChart(document.getElementById("flowCanvas"),data,[
+    {key:"Q",color:"#be123c",width:2.8}
+  ],"输水流量 Q（m³/s）",markers,{
+    Amin:d.AminEff,
+    Amax:p.Amax,
+    pointKey:"Q",
+    pointX:"Astar",
+    pointYValue:model(d.Astar,p,d).Q,
+    pointColor:"#dc2626",
+    pointStroke:"#ffffff",
+    yDecimals:0
+  });
+
+  drawChart(document.getElementById("velocityCanvas"),data,[
+    {key:"v",color:"#111827",width:2.8}
+  ],"廊道平均流速 v（m/s）",markers,{
+    Amin:d.AminEff,
+    Amax:p.Amax,
+    pointKey:"v",
+    pointX:"Astar",
+    pointYValue:model(d.Astar,p,d).v,
+    pointColor:"#dc2626",
+    pointStroke:"#ffffff",
+    yLine:p.vmax,
+    yLabel:"vmax="+fmt(p.vmax,1)+" m/s",
+    yColor:"#ef4444",
+    yLine2:p.vbase,
+    yLabel2:"vbase="+fmt(p.vbase,1)+" m/s",
+    yColor2:"#f59e0b",
+    yDecimals:1
+  });
+
+  const barCases=[
+    {name:"水力下限",...model(d.AminEff,p,d)},
+    {name:"最优断面",...model(d.Astar,p,d)},
+    {name:"偏大断面",...model(p.Amax,p,d)}
+  ];
+  drawBar(document.getElementById("barCanvas"),barCases);
+}
+function reset(){
+  ids.forEach(id=>setVal(id,defaults[id]));
+  recalcAnimated();
+}
+function exportCSV(){
+  const p=params(), d=derived(p);
+  if(!latestData.length) latestData=sample(p,d);
+  const header=["A_m2","A_total_m2","t_min","Q_m3_s","v_m_s","Ccon_billion_CNY","Cop_billion_CNY","TC_billion_CNY","ok_time","ok_area","ok_velocity","volume_scale","K0_effective"];
+  const rows=latestData.map(m=>[m.A,m.Atotal,m.t,m.Q,m.v,m.Ccon,m.Cop,m.TC,m.okT,m.okA,m.okV,d.volumeScale,d.K0eff].join(","));
+  const csv="\uFEFF"+header.join(",")+"\n"+rows.join("\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="三峡船闸输水廊道断面优化报告标定数据.csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+let calcTimer = null;
+let stepTimer = null;
+let hasPendingChanges = false;
+
+function allChartCanvases(){
+  return ["costCanvas","timeCanvas","flowCanvas","velocityCanvas","barCanvas"]
+    .map(id=>document.getElementById(id))
+    .filter(Boolean);
+}
+
+function markChartsWaiting(){
+  allChartCanvases().forEach(c=>c.classList.add("waiting-update"));
+}
+
+function clearChartsWaiting(){
+  allChartCanvases().forEach(c=>c.classList.remove("waiting-update"));
+}
+
+function flashChartsUpdated(){
+  const charts = allChartCanvases();
+  charts.forEach(c=>{
+    c.classList.remove("chart-updated");
+    void c.offsetWidth;
+    c.classList.add("chart-updated");
+  });
+  const toast = document.getElementById("updateToast");
+  if(toast){
+    toast.classList.remove("show");
+    void toast.offsetWidth;
+    toast.classList.add("show");
+  }
+}
+
+function setCalcStep(index, progress, text){
+  for(let i=1;i<=4;i++){
+    const el = document.getElementById("step"+i);
+    if(el) el.classList.toggle("active", i === index);
+  }
+  const bar = document.getElementById("calcProgress");
+  if(bar) bar.style.width = progress + "%";
+  const desc = document.getElementById("calcDesc");
+  if(desc && text) desc.textContent = text;
+}
+
+function setInlineDirty(){
+  const inline = document.getElementById("calcInline");
+  if(!inline) return;
+  inline.classList.add("show","dirty");
+  inline.innerHTML = "参数已修改，按 Enter 计算";
+}
+
+function setInlineCalculating(){
+  const inline = document.getElementById("calcInline");
+  if(!inline) return;
+  inline.classList.remove("dirty");
+  inline.classList.add("show");
+  inline.innerHTML = '<span class="mini-spinner"></span>正在计算';
+}
+
+function clearInlineStatus(){
+  const inline = document.getElementById("calcInline");
+  if(!inline) return;
+  inline.classList.remove("show","dirty");
+  inline.innerHTML = '<span class="mini-spinner"></span>正在计算';
+}
+
+function markDirty(){
+  hasPendingChanges = true;
+  clearTimeout(calcTimer);
+  clearInterval(stepTimer);
+  setInlineDirty();
+  markChartsWaiting();
+}
+
+function showCalcAnimation(){
+  const overlay = document.getElementById("calcOverlay");
+  if(overlay) overlay.classList.add("show");
+  setInlineCalculating();
+
+  const steps = [
+    [1,18,"已收到计算指令，正在读取输入并更新水力边界。"],
+    [2,46,"正在计算理论最优断面、输水时长、流量与流速。"],
+    [3,72,"正在进行时间约束、空间约束与流速约束校核。"],
+    [4,92,"正在刷新成本曲线、A-t 曲线、A-Q 曲线、A-v 曲线和方案表。"]
+  ];
+
+  clearInterval(stepTimer);
+  let idx = 0;
+  setCalcStep(steps[0][0], steps[0][1], steps[0][2]);
+  stepTimer = setInterval(()=>{
+    idx = Math.min(idx + 1, steps.length - 1);
+    setCalcStep(steps[idx][0], steps[idx][1], steps[idx][2]);
+    if(idx === steps.length - 1) clearInterval(stepTimer);
+  }, 130);
+}
+
+function hideCalcAnimation(){
+  clearInterval(stepTimer);
+  setCalcStep(4,100,"计算完成，图表已更新。");
+  hasPendingChanges = false;
+  setTimeout(()=>{
+    const overlay = document.getElementById("calcOverlay");
+    if(overlay) overlay.classList.remove("show");
+    clearInlineStatus();
+  }, 160);
+}
+
+function recalcAnimated(){
+  showCalcAnimation();
+  clearTimeout(calcTimer);
+  calcTimer = setTimeout(()=>{
+    recalc();
+    clearChartsWaiting();
+    flashChartsUpdated();
+    hideCalcAnimation();
+  }, 520);
+}
+
+function handleEnterToRecalc(event){
+  if(event.key === "Enter"){
+    event.preventDefault();
+    recalcAnimated();
+  }
+}
+
+
+ids.forEach(id=>{
+  const el = document.getElementById(id);
+  el.addEventListener("input",markDirty);
+  el.addEventListener("keydown",handleEnterToRecalc);
+});
+document.addEventListener("keydown",event=>{
+  if(event.key === "Enter" && hasPendingChanges){
+    const tag = (event.target && event.target.tagName || "").toLowerCase();
+    if(tag !== "button"){
+      event.preventDefault();
+      recalcAnimated();
+    }
+  }
+});
+document.getElementById("calcBtn").addEventListener("click",recalcAnimated);
+document.getElementById("resetBtn").addEventListener("click",reset);
+document.getElementById("csvBtn").addEventListener("click",exportCSV);
+window.addEventListener("resize",recalc);
+recalc();
+</script>
+<div class="update-toast" id="updateToast">图表已更新</div>
+</body>
+</html>
